@@ -1,12 +1,25 @@
 {
-    "name": "@zenith/plugins",
-    "version": "0.0.0",
-    "private": true,
-    "description": "Plugin directory for Zenith framework",
-    "workspaces": [],
+    "name": "@zenithbuild/plugins",
+    "version": "0.1.0",
+    "description": "Plugin system for Zenith framework",
+    "type": "module",
+    "main": "index.ts",
+    "scripts": {
+        "dev": "bun dev",
+        "build": "bun build",
+        "start": "bun run build && bun run dev"
+    },
     "repository": {
         "type": "git",
-        "url": "https://github.com/zenith/zenith-plugins"
+        "url": "git@github.com:zenithbuild/zenith-plugins.git"
     },
-    "license": "MIT"
+    "keywords": [
+        "zenith",
+        "plugins",
+        "framework"
+    ],
+    "author": "Zenith Team",
+    "license": "MIT",
+    "private": false,
+    "dependencies": {}
 }
