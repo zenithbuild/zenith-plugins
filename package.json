@@ -1,6 +1,6 @@
 {
     "name": "@zenithbuild/plugins",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "Plugin system for Zenith framework",
     "type": "module",
     "main": "index.ts",
