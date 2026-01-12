@@ -21,5 +21,8 @@
     "author": "Zenith Team",
     "license": "MIT",
     "private": false,
-    "dependencies": {}
+    "dependencies": {},
+    "devDependencies": {
+        "@types/node": "^25.0.6"
+    }
 }
