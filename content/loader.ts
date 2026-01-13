@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ContentItem, ContentSourceConfig } from './types';
+import { compileMarkdown, vnodesToHtml } from './markdown';
 
 export function loadContent(contentDir: string): ContentItem[] {
     if (!fs.existsSync(contentDir)) {
@@ -34,12 +35,15 @@ export function loadContent(contentDir: string): ContentItem[] {
                 console.error(`Error parsing JSON file ${filePath}:`, e);
             }
         } else if (ext === '.md' || ext === '.mdx') {
-            const { metadata, content } = parseMarkdown(rawContent);
+            const { metadata, content: markdownBody } = parseMarkdown(rawContent);
+            // Compile markdown to VNodes then to HTML for rendering
+            const vnodes = compileMarkdown(markdownBody);
+            const compiledContent = vnodesToHtml(vnodes);
             items.push({
                 id,
                 slug,
                 collection,
-                content,
+                content: compiledContent,
                 ...metadata
             });
         }

@@ -34,6 +34,21 @@ export { defineSchema } from "./schema";
 export { ZenCollection } from "./query";
 export type { ContentItem, ContentPluginOptions, ContentSourceConfig } from "./types";
 
+// Export useZenOrder hook and utilities
+export {
+  createZenOrder,
+  processRawSections,
+  buildDocUrl,
+  parseDocUrl
+} from "./hooks/useZenOrder";
+export type {
+  DocItem,
+  Section,
+  ZenOrderState,
+  ZenOrderActions,
+  ZenOrderReturn
+} from "./hooks/useZenOrder";
+
 // Store for loaded content (used by legacy zenQuery)
 let allContent: ContentItem[] = [];
 
