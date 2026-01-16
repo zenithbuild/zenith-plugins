@@ -1,36 +1,36 @@
 {
-    "name": "@zenithbuild/plugins",
-    "version": "0.3.0",
-    "description": "Plugin system for Zenith framework",
-    "type": "module",
-    "main": "index.ts",
-    "scripts": {
-        "dev": "bun dev",
-        "build": "bun build",
-        "start": "bun run build && bun run dev",
-        "release": "bun run scripts/release.ts",
-        "release:dry": "bun run scripts/release.ts --dry-run",
-        "release:patch": "bun run scripts/release.ts --bump=patch",
-        "release:minor": "bun run scripts/release.ts --bump=minor",
-        "release:major": "bun run scripts/release.ts --bump=major"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git@github.com:zenithbuild/zenith-plugins.git"
-    },
-    "keywords": [
-        "zenith",
-        "plugins",
-        "framework"
-    ],
-    "author": "Zenith Team",
-    "license": "MIT",
-    "publishConfig": {
-        "access": "public"
-    },
-    "private": false,
-    "dependencies": {},
-    "devDependencies": {
-        "@types/node": "^25.0.6"
-    }
+  "name": "@zenithbuild/plugins",
+  "version": "0.3.1",
+  "description": "Plugin system for Zenith framework",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "bun dev",
+    "build": "bun build",
+    "start": "bun run build && bun run dev",
+    "release": "bun run scripts/release.ts",
+    "release:dry": "bun run scripts/release.ts --dry-run",
+    "release:patch": "bun run scripts/release.ts --bump=patch",
+    "release:minor": "bun run scripts/release.ts --bump=minor",
+    "release:major": "bun run scripts/release.ts --bump=major"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:zenithbuild/zenith-plugins.git"
+  },
+  "keywords": [
+    "zenith",
+    "plugins",
+    "framework"
+  ],
+  "author": "Zenith Team",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false,
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^25.0.6"
+  }
 }
