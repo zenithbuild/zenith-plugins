@@ -67,15 +67,33 @@ export interface ZenithPlugin {
   name: string;
   setup: (ctx: PluginContext) => void | Promise<void>;
   config?: unknown;
+  registerCLI?: (api: CLIBridgeAPI) => void;
 }
 
 /**
- * Context provided to plugins during setup
+ * Context provided to plugins during setup (matches core generic signature)
  */
 export interface PluginContext {
   projectRoot: string;
-  setContentData: (data: Record<string, ContentItem[]>) => void;
+  setPluginData: (namespace: string, data: unknown[]) => void;
   options?: Record<string, unknown>;
+}
+
+/**
+ * CLI Bridge API for hook registration
+ * Matches core's CLIBridgeAPI interface
+ */
+export interface CLIBridgeAPI {
+  on(hook: string, handler: (ctx: HookContext) => unknown | void): void;
+}
+
+/**
+ * Hook context passed to CLI hooks
+ */
+export interface HookContext {
+  projectRoot: string;
+  getPluginData: (namespace: string) => unknown;
+  [key: string]: unknown;
 }
 
 /**
@@ -111,11 +129,45 @@ export default function content(options: ContentPluginOptions = {}): ZenithPlugi
         console.log(`[zenith:content] Loaded ${items.length} items from ${options.contentDir}`);
       }
 
-      // Pass to runtime
-      ctx.setContentData(collections);
+      // Pass to runtime using generic namespaced data store
+      const allItems = Object.values(collections).flat();
+      ctx.setPluginData('content', allItems);
 
       // Update legacy storage
-      allContent = Object.values(collections).flat();
+      allContent = allItems;
+    },
+
+    /**
+     * CLI Registration - Plugin owns its CLI behavior
+     * 
+     * Registers namespaced hooks for CLI lifecycle events.
+     * The CLI never calls plugin logic directly - it dispatches hooks.
+     */
+    registerCLI(api: CLIBridgeAPI) {
+      // Register for runtime data collection
+      // CLI collects payloads and serializes to window.__ZENITH_PLUGIN_DATA__
+      api.on('cli:runtime:collect', (ctx: HookContext) => {
+        const data = ctx.getPluginData('content');
+        if (!data) return;
+
+        return {
+          namespace: 'content',
+          payload: data
+        };
+      });
+
+      // Register for file change events (plugin decides what to do)
+      api.on('cli:dev:file-change', (ctx: HookContext) => {
+        const filename = ctx.filename as string | undefined;
+        if (!filename) return;
+
+        // Plugin owns knowledge of what files it cares about
+        if (filename.startsWith('content') || filename.endsWith('.md') || filename.endsWith('.mdx')) {
+          // Signal that content should be reloaded
+          // The actual reload happens via plugin re-initialization
+          console.log('[zenith:content] Content file changed:', filename);
+        }
+      });
     }
   };
 }
@@ -125,7 +177,7 @@ export default function content(options: ContentPluginOptions = {}): ZenithPlugi
  * @deprecated Use the default export factory function instead
  */
 export const plugin: ZenithPlugin = {
-  name: "content",
+  name: "zenith-content",
   setup(ctx: PluginContext) {
     const contentDir = path.resolve(ctx.projectRoot, "content");
     const items = loadContent(contentDir);
@@ -141,8 +193,17 @@ export const plugin: ZenithPlugin = {
     }
 
     allContent = items;
-    ctx.setContentData(collections);
+    ctx.setPluginData('content', items);
 
     console.log(`[zenith:content] Loaded ${items.length} items from ${contentDir}`);
+  },
+
+  registerCLI(api: CLIBridgeAPI) {
+    api.on('cli:runtime:collect', (ctx: HookContext) => {
+      const data = ctx.getPluginData('content');
+      if (!data) return;
+      return { namespace: 'content', payload: data };
+    });
   }
 };
+
