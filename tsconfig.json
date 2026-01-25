@@ -20,7 +20,7 @@
         ],
         "baseUrl": ".",
         "paths": {
-            "@zenith/core": [
+            "@zenithbuild/core": [
                 "./content/types.ts"
             ]
         }

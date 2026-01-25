@@ -1,9 +1,9 @@
 {
   "name": "@zenithbuild/plugins",
-  "version": "0.3.1",
+  "version": "0.3.6",
   "description": "Plugin system for Zenith framework",
   "type": "module",
-  "main": "index.ts",
+  "main": "content/index.ts",
   "scripts": {
     "dev": "bun dev",
     "build": "bun build",

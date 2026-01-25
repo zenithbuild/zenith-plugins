@@ -109,8 +109,16 @@ export function compileMarkdown(markdown: string): VNode[] {
         const line = lines[i];
         const trimmed = line.trim();
 
-        // Skip empty lines
-        if (trimmed === '') {
+        // Raw HTML: if a line starts with < and ends with > (simplified detection)
+        if (trimmed.startsWith('<') && trimmed.endsWith('>')) {
+            // We'll treat this as a raw HTML block. 
+            // VNode doesn't have a 'raw' type, so we'll use a special tag 'div' 
+            // but we need a way to signal it shouldn't be escaped.
+            // Since our system uses innerHTML for the final injection, 
+            // we can just put the raw HTML in the children for now?
+            // Wait, vnodesToHtml will escape children if they are strings.
+            // Let's use a special tag 'zen-raw-html' that vnodesToHtml handles.
+            nodes.push(h('zen-raw-html', { html: trimmed }, []));
             i++;
             continue;
         }
@@ -185,6 +193,12 @@ export function compileMarkdown(markdown: string): VNode[] {
             continue;
         }
 
+        // Skip empty lines explicitly to prevent infinite loop
+        if (trimmed === '') {
+            i++;
+            continue;
+        }
+
         // Paragraph: collect consecutive non-empty lines
         const paraLines: string[] = [];
         while (i < lines.length && lines[i].trim() !== '' &&
@@ -218,6 +232,10 @@ export function vnodesToHtml(nodes: VNode[]): string {
         }
 
         const { tag, props, children } = node;
+
+        if (tag === 'zen-raw-html') {
+            return props.html || '';
+        }
 
         // Self-closing tags
         if (tag === 'hr' || tag === 'br') {

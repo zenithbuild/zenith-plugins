@@ -172,90 +172,78 @@ export function createZenOrder(rawSections: any[]): ZenOrderReturn {
     // Process and sort sections
     const sections = processRawSections(rawSections);
 
-    // Initialize state
-    let state: ZenOrderState = {
+    // React to selection changes by updating the returned object's properties
+    const actions: ZenOrderActions = {
+        selectSection: (section: Section): void => {
+            instance.selectedSection = section;
+            instance.selectedDoc = section.items[0] || null;
+        },
+
+        selectDoc: (doc: DocItem): void => {
+            instance.selectedDoc = doc;
+            const docSection = sections.find(s => s.slug === doc.sectionSlug);
+            if (docSection) {
+                instance.selectedSection = docSection;
+            }
+        },
+
+        getSectionBySlug: (sectionSlug: string): Section | null => {
+            return sections.find(s => s.slug === sectionSlug) || null;
+        },
+
+        getDocBySlug: (sectionSlug: string, docSlug: string): DocItem | null => {
+            const section = sections.find(s => s.slug === sectionSlug);
+            if (!section) return null;
+            return section.items.find(d => d.slug === docSlug) || null;
+        },
+
+        getNextDoc: (currentDoc: DocItem): DocItem | null => {
+            const currentSection = sections.find(s => s.slug === currentDoc.sectionSlug);
+            if (!currentSection) return null;
+
+            const currentIndex = currentSection.items.findIndex(d => d.slug === currentDoc.slug);
+
+            if (currentIndex < currentSection.items.length - 1) {
+                return currentSection.items[currentIndex + 1];
+            }
+
+            const sectionIndex = sections.findIndex(s => s.slug === currentSection.slug);
+            if (sectionIndex < sections.length - 1) {
+                const nextSection = sections[sectionIndex + 1];
+                return nextSection.items[0] || null;
+            }
+
+            return null;
+        },
+
+        getPrevDoc: (currentDoc: DocItem): DocItem | null => {
+            const currentSection = sections.find(s => s.slug === currentDoc.sectionSlug);
+            if (!currentSection) return null;
+
+            const currentIndex = currentSection.items.findIndex(d => d.slug === currentDoc.slug);
+
+            if (currentIndex > 0) {
+                return currentSection.items[currentIndex - 1];
+            }
+
+            const sectionIndex = sections.findIndex(s => s.slug === currentSection.slug);
+            if (sectionIndex > 0) {
+                const prevSection = sections[sectionIndex - 1];
+                return prevSection.items[prevSection.items.length - 1] || null;
+            }
+
+            return null;
+        }
+    };
+
+    const instance: ZenOrderReturn = {
         sections,
         selectedSection: sections[0] || null,
-        selectedDoc: sections[0]?.items[0] || null
+        selectedDoc: sections[0]?.items[0] || null,
+        ...actions
     };
 
-    // Actions
-    const selectSection = (section: Section): void => {
-        state.selectedSection = section;
-        state.selectedDoc = section.items[0] || null;
-    };
-
-    const selectDoc = (doc: DocItem): void => {
-        state.selectedDoc = doc;
-        // Also update selected section if doc is from a different section
-        const docSection = sections.find(s => s.slug === doc.sectionSlug);
-        if (docSection && state.selectedSection?.slug !== doc.sectionSlug) {
-            state.selectedSection = docSection;
-        }
-    };
-
-    const getSectionBySlug = (sectionSlug: string): Section | null => {
-        return sections.find(s => s.slug === sectionSlug) || null;
-    };
-
-    const getDocBySlug = (sectionSlug: string, docSlug: string): DocItem | null => {
-        const section = getSectionBySlug(sectionSlug);
-        if (!section) return null;
-        return section.items.find(d => d.slug === docSlug) || null;
-    };
-
-    const getNextDoc = (currentDoc: DocItem): DocItem | null => {
-        const currentSection = sections.find(s => s.slug === currentDoc.sectionSlug);
-        if (!currentSection) return null;
-
-        const currentIndex = currentSection.items.findIndex(d => d.slug === currentDoc.slug);
-
-        // Try next doc in same section
-        if (currentIndex < currentSection.items.length - 1) {
-            return currentSection.items[currentIndex + 1];
-        }
-
-        // Try first doc of next section
-        const sectionIndex = sections.findIndex(s => s.slug === currentSection.slug);
-        if (sectionIndex < sections.length - 1) {
-            const nextSection = sections[sectionIndex + 1];
-            return nextSection.items[0] || null;
-        }
-
-        return null;
-    };
-
-    const getPrevDoc = (currentDoc: DocItem): DocItem | null => {
-        const currentSection = sections.find(s => s.slug === currentDoc.sectionSlug);
-        if (!currentSection) return null;
-
-        const currentIndex = currentSection.items.findIndex(d => d.slug === currentDoc.slug);
-
-        // Try previous doc in same section
-        if (currentIndex > 0) {
-            return currentSection.items[currentIndex - 1];
-        }
-
-        // Try last doc of previous section
-        const sectionIndex = sections.findIndex(s => s.slug === currentSection.slug);
-        if (sectionIndex > 0) {
-            const prevSection = sections[sectionIndex - 1];
-            return prevSection.items[prevSection.items.length - 1] || null;
-        }
-
-        return null;
-    };
-
-    return {
-        ...state,
-        sections,
-        selectSection,
-        selectDoc,
-        getNextDoc,
-        getPrevDoc,
-        getDocBySlug,
-        getSectionBySlug
-    };
+    return instance;
 }
 
 /**

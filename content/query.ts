@@ -97,4 +97,70 @@ export class ZenCollection {
         const results = await this.get();
         return results.length;
     }
+
+    /**
+     * Group items by folder (first segment of slug).
+     * Returns an object with a groupByFolder method that can be chained.
+     */
+    groupByFolder(): { get: () => Array<{ id: string; title: string; items: ContentItem[] }> } {
+        const self = this;
+        return {
+            get(): Array<{ id: string; title: string; items: ContentItem[] }> {
+                let results = [...self.collectionItems];
+
+                // 1. Filter
+                for (const filter of self.filters) {
+                    results = results.filter(filter);
+                }
+
+                // 2. Sort
+                if (self.sortField) {
+                    results.sort((a, b) => {
+                        const valA = a[self.sortField!];
+                        const valB = b[self.sortField!];
+
+                        if (valA < valB) return self.sortOrder === 'asc' ? -1 : 1;
+                        if (valA > valB) return self.sortOrder === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                // 3. Limit
+                if (self.limitCount !== null) {
+                    results = results.slice(0, self.limitCount);
+                }
+
+                // Group by folder (first segment of slug)
+                const groups = new Map<string, ContentItem[]>();
+                for (const item of results) {
+                    const slug = String(item.slug || item.id || '');
+                    const parts = slug.split('/');
+                    const folder = parts.length > 1 ? parts[0] : 'default';
+
+                    if (!groups.has(folder)) {
+                        groups.set(folder, []);
+                    }
+                    groups.get(folder)!.push(item);
+                }
+
+                // Convert to array of sections
+                const sections: Array<{ id: string; title: string; items: ContentItem[] }> = [];
+                for (const [folder, items] of groups) {
+                    // Generate title from folder name
+                    const title = folder
+                        .split('-')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+
+                    sections.push({
+                        id: folder,
+                        title,
+                        items
+                    });
+                }
+
+                return sections;
+            }
+        };
+    }
 }
