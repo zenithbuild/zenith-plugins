@@ -107,14 +107,13 @@ export default function content(options: ContentPluginOptions = {}): ZenithPlugi
     name: 'zenith-content',
     config: options,
     setup(ctx: PluginContext) {
-      console.log('[zenith:content] setup() starting...');
+
       let collections: Record<string, ContentItem[]> = {};
 
       if (options.sources && Object.keys(options.sources).length > 0) {
         // Use new sources configuration
-        console.log('[zenith:content] Loading from sources...');
+        // Use new sources configuration
         collections = loadFromSources(options.sources, ctx.projectRoot);
-        console.log('[zenith:content] loadFromSources completed');
       } else if (options.contentDir) {
         // Legacy: single content directory
         const contentPath = path.resolve(ctx.projectRoot, options.contentDir);
@@ -129,17 +128,16 @@ export default function content(options: ContentPluginOptions = {}): ZenithPlugi
           collections[collection].push(item);
         }
 
-        console.log(`[zenith:content] Loaded ${items.length} items from ${options.contentDir}`);
+
       }
 
       // Pass to runtime using generic namespaced data store
       const allItems = Object.values(collections).flat();
-      console.log('[zenith:content] Setting plugin data, items:', allItems.length);
       ctx.setPluginData('content', allItems);
 
       // Update legacy storage
       allContent = allItems;
-      console.log('[zenith:content] setup() completed');
+
     },
 
     /**
@@ -170,7 +168,7 @@ export default function content(options: ContentPluginOptions = {}): ZenithPlugi
         if (filename.startsWith('content') || filename.endsWith('.md') || filename.endsWith('.mdx')) {
           // Signal that content should be reloaded
           // The actual reload happens via plugin re-initialization
-          console.log('[zenith:content] Content file changed:', filename);
+
         }
       });
     }
@@ -200,7 +198,7 @@ export const plugin: ZenithPlugin = {
     allContent = items;
     ctx.setPluginData('content', items);
 
-    console.log(`[zenith:content] Loaded ${items.length} items from ${contentDir}`);
+
   },
 
   registerCLI(api: CLIBridgeAPI) {
